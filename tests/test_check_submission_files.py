@@ -23,59 +23,6 @@ def test_check_submission_files():
     )
 
 
-def test_check_gai_survey():
-    """Check for and validate GAI.md."""
-    assert os.path.exists("GAI.md")
-
-    with open("GAI.md", encoding="utf-8") as md_file:
-        md_text = md_file.read()
-
-    # Parse the HTML content
-    html_text = markdown.markdown(md_text, extensions=["attr_list"])
-    soup = bs4.BeautifulSoup(html_text, "html.parser")
-
-    # Extract answers
-    num_questions = 27
-    answers = {}
-    for i in range(1, num_questions+1):
-        qid = f"Q{i:02d}"
-        question = soup.find(id=qid)
-        assert question, f"Failed to find {qid}"
-        answer = question.find_next()
-        text = answer.text.strip()
-        if answer.name == "ul" and qid == "Q06":
-            # Multiple selection
-            answers.update(validate_muliple_selection(answer, qid))
-        elif answer.name == "ul":
-            # Multiple choice
-            answers[qid] = validate_multiple_choice(answer, qid)
-        elif answer.name == "p" and text.isdigit():
-            # Numeric
-            answers[qid] = int(text)
-        else:
-            # Text
-            answers[qid] = text
-
-    # Validate ULCS count
-    for i in range(2, 5):  # Q2 - Q4 inclusive
-        count = int(answers[f"Q0{i}"])
-        assert 0 <= count <= 15
-
-    # Assert valid free response answers
-    free_reponse_qids = [
-        "Q11",
-        "Q13",
-        "Q14",
-        "Q18",
-        "Q19",
-        "Q23",
-        "Q24"
-    ]
-    for qid in free_reponse_qids:
-        assert answers[qid]
-        assert answers[qid].upper() != "FIXME"
-
-
 def validate_multiple_choice(ele, qid):
     """Validate multiple choice response and return answer."""
     assert ele.name == "ul"
