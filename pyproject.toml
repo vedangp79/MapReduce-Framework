@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mapreduce"
-description = "EECS 485 MapReduce"
+description = "A fault-tolerant, distributed MapReduce framework implemented from scratch in Python"
 version = "1.0.0"
 requires-python = ">=3.10"
 dependencies = [
